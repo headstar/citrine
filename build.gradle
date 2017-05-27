@@ -1,0 +1,83 @@
+plugins {
+    id 'net.saliman.cobertura' version '2.2.8'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.14'
+}
+
+def javaProjects = [ project(':citrine-core'), project(':citrine-jobstore-jdbc'), project(':citrine-jobstore-common-test'), project(':citrine-spring'),
+project(':citrine-samples-simple')]
+def javaTestCoverageProjects = [ project(':citrine-core'), project(':citrine-jobstore-jdbc'), project(':citrine-spring') ]
+def javaReleaseProjects = [ project(':citrine-core'), project(':citrine-jobstore-jdbc'), project(':citrine-spring') ]
+
+configure(javaProjects) {
+    apply from: "$rootDir/gradle/javaprojects.gradle"
+
+    ext.slf4jApiVersion = '1.7.7'
+    ext.junitVersion = '4.12'
+    ext.guavaVersion = '18.0'
+    ext.cronUtilsVersion = '3.1.2'
+    ext.logbackClassicVersion = '1.0.13'
+    ext.springVersion = '4.2.3.RELEASE'
+    ext.mockitoVersion = '1.10.19'
+    ext.springRetryVersion = '1.1.2.RELEASE'
+    ext.h2Version = '1.4.190'
+
+}
+
+configure(javaTestCoverageProjects) {
+    apply plugin: 'cobertura'
+
+}
+
+configure(javaReleaseProjects) {
+    apply plugin: 'maven'
+
+    group = "com.tango.citrine"
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+
+    install.dependsOn(test)
+}
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+idea {
+    project {
+        languageLevel = '1.6'
+    }
+}
+
+// configuring cobertura to merge results of subprojects
+
+def childTestTasks = []
+def coverageDatafiles = []
+def testSourceDirs = []
+javaTestCoverageProjects.each {
+    coverageDatafiles << it.file("build/cobertura/cobertura.ser")
+    childTestTasks << "${it.name}:test"
+    testSourceDirs << it.file("src/main/java").path
+}
+
+cobertura {
+    coverageMergeDatafiles = coverageDatafiles
+    coverageSourceDirs  = testSourceDirs
+}
+
+// make sure this test task is run last
+test.dependsOn(childTestTasks)

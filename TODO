@@ -1,0 +1,22 @@
+* move convertFromJDBCJob(...) out of transaction
+* catch transient data exception and recoverable... in acquire()...
+
+* also acquire "old" executing jobs, setting a flag in TriggeredJob?
+    * to avoid multiple/concurrent execution set flag in scheduler context?
+        x doesn't work, multiple machines running this
+* Better with non-locking select + locking select by key?
+* look at https://github.com/flyway/flyway/issues/830?
+* dockerize?? https://github.com/bmuschko/gradle-docker-plugin
+
+x core <-> jobstore-common-test circular dependency (hard to fix!)
+x change acquired to EXECUTING
+x make configuration dynamic
+x add retries in DefaultJobCompleter
+x add @EnableCitrine annotation
+x cast JobStore to JDBC... in factory and get transaction operations from there!
+x add initialize() method to scheduler, jobstore, etc...
+x Wrap Transient/Recoverable dataException in Citrine specific subclasses? (make it easier to specify rollbackFor...?)
+x use DuplicateKeyException when doing job replace
+x spring scheduling terminology (nextExecutionTime)
+x scheduleJob should return true if job already existed
+

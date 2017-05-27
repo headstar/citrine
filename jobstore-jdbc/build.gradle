@@ -1,0 +1,19 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+dependencies {
+    compile project(':citrine-core')
+    compile "org.springframework:spring-jdbc:$springVersion"
+    compile "org.springframework.retry:spring-retry:$springRetryVersion"
+
+    testCompile project(':citrine-jobstore-common-test')
+    testCompile "junit:junit:$junitVersion"
+    testCompile "com.h2database:h2:$h2Version"
+    testRuntime "ch.qos.logback:logback-classic:$logbackClassicVersion"
+
+}
+
+

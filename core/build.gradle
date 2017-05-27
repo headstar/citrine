@@ -1,0 +1,9 @@
+dependencies {
+    compile "org.slf4j:slf4j-api:$slf4jApiVersion"
+    compile "com.google.guava:guava:$guavaVersion"
+    compile "com.cronutils:cron-utils:$cronUtilsVersion"
+
+    testCompile "junit:junit:$junitVersion"
+    testCompile "org.mockito:mockito-all:$mockitoVersion"
+    testRuntime "ch.qos.logback:logback-classic:$logbackClassicVersion"
+}

@@ -1,0 +1,14 @@
+dependencies {
+    compile project(':citrine-core')
+    compile project(':citrine-jobstore-jdbc')
+    compile "org.springframework:spring-context:$springVersion"
+
+    testCompile "junit:junit:$junitVersion"
+    testCompile 'com.zaxxer:HikariCP-java6:2.3.12'
+    testCompile "com.h2database:h2:$h2Version"
+    testRuntime "ch.qos.logback:logback-classic:$logbackClassicVersion"
+}
+
+processTestResources {
+    expand project.properties
+}

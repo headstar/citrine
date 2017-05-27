@@ -1,0 +1,26 @@
+def String[] modules = [
+	'core', 'jobstore-jdbc', 'jobstore-common-test', 'spring'
+]
+
+include modules
+
+modules.each {name ->
+	def p = findProject(":${name}")
+	p.name = "citrine-${name}"
+}
+
+def String[] samples = [
+		'simple'
+]
+
+include samples
+
+samples.each {name ->
+	def p = findProject(":${name}")
+	def fullName = name.replaceAll('/','')
+	p.name = "citrine-samples-${fullName}"
+	p.projectDir = new File(settingsDir, "samples/${name}");
+}
+
+
+rootProject.name = 'citrine'
