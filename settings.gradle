@@ -1,5 +1,5 @@
 def String[] modules = [
-	'core', 'jobstore-jdbc', 'jobstore-common-test', 'spring'
+	'core', 'jobstore-jdbc', 'jobstore-common-test', 'spring', 'jobstore-jdbc-perf-test'
 ]
 
 include modules
