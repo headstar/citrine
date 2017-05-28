@@ -54,6 +54,7 @@ public class NamedParameterJdbcTemplateDAO implements JobStoreDAO {
         namedParameters.addValue(querySource.getJobDataParameter(), job.getJobData());
         namedParameters.addValue(querySource.getCronExpressionParameter(), job.getCronExpression());
         namedParameters.addValue(querySource.getVersionParameter(), job.getVersion());
+        namedParameters.addValue(querySource.getNowParameter(), new Date());
 
         return namedParameterJdbcTemplate.update(querySource.getUpdateSQL(), namedParameters) == 1;
     }
@@ -112,6 +113,7 @@ public class NamedParameterJdbcTemplateDAO implements JobStoreDAO {
         }
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue(querySource.getIdsParameter(), jobIds);
+        namedParameters.addValue(querySource.getNowParameter(), new Date());
         namedParameterJdbcTemplate.update(querySource.getSetAsExecutingSQL(), namedParameters);
     }
 
@@ -148,6 +150,7 @@ public class NamedParameterJdbcTemplateDAO implements JobStoreDAO {
         namedParameters.addValue(querySource.getJobDataParameter(), job.getJobData());
         namedParameters.addValue(querySource.getCronExpressionParameter(), job.getCronExpression());
         namedParameters.addValue(querySource.getVersionParameter(), job.getVersion());
+        namedParameters.addValue(querySource.getNowParameter(), new Date());
         return namedParameters;
     }
 }

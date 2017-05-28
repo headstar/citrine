@@ -5,13 +5,13 @@ package com.tango.citrine.jobstore.jdbc.dao;
  */
 public abstract class AbstractQuerySource implements QuerySource {
 
-    private static final String INSERT_JOB_SQL_TEMPLATE = "INSERT INTO %s (id, created_time, updated_time, job_state, next_execution_time, job_class, priority, job_data, cron_expression, version) VALUES (:id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :job_state, :next_execution_time, :job_class, :priority, :job_data, :cron_expression, :version)";
+    private static final String INSERT_JOB_SQL_TEMPLATE = "INSERT INTO %s (id, created_time, updated_time, job_state, next_execution_time, job_class, priority, job_data, cron_expression, version) VALUES (:id, :now, :now, :job_state, :next_execution_time, :job_class, :priority, :job_data, :cron_expression, :version)";
     private static final String DELETE_JOB_SQL_TEMPLATE = "DELETE FROM %s WHERE id = :id";
     private static final String DELETE_JOB_WITH_VERSION_SQL_TEMPLATE = "DELETE FROM %s WHERE id = :id AND version = :version";
     private static final String SELECT_JOB_SQL_TEMPLATE = "SELECT * FROM %s WHERE id = :id";
     private static final String SELECT_JOB_EXISTS_SQL_TEMPLATE = "SELECT COUNT(id) FROM %s WHERE id = :id";
-    private static final String UPDATE_JOB_SQL_TEMPLATE = "UPDATE %s SET updated_time = CURRENT_TIMESTAMP, job_state = :job_state, next_execution_time = :next_execution_time, cron_expression = :cron_expression, job_class = :job_class, priority = :priority, job_data = :job_data, version = version + 1 WHERE id = :id AND version = :version";
-    private static final String SET_AS_EXECUTING_SQL_TEMPLATE = "UPDATE %s SET updated_time = NOW(), job_state = 'EXECUTING', version = version + 1 WHERE id IN(:ids)";
+    private static final String UPDATE_JOB_SQL_TEMPLATE = "UPDATE %s SET updated_time = :now, job_state = :job_state, next_execution_time = :next_execution_time, cron_expression = :cron_expression, job_class = :job_class, priority = :priority, job_data = :job_data, version = version + 1 WHERE id = :id AND version = :version";
+    private static final String SET_AS_EXECUTING_SQL_TEMPLATE = "UPDATE %s SET updated_time = :now, job_state = 'EXECUTING', version = version + 1 WHERE id IN(:ids)";
 
     private final String insertSQL;
     private final String deleteSQL;
