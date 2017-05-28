@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -100,7 +99,7 @@ public class NamedParameterJdbcTemplateDAO implements JobStoreDAO {
     @Override
     public List<JDBCJob> acquireTriggeredJobs(Date referenceTime, int maxCount) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        namedParameters.addValue(querySource.getReferenceTimeParameter(), referenceTime);
+        namedParameters.addValue(querySource.getNowParameter(), referenceTime);
         namedParameters.addValue(querySource.getLimitParameter(), maxCount);
 
         return namedParameterJdbcTemplate.query(querySource.getSelectTriggeredSQL(), namedParameters, rowMapper);

@@ -31,7 +31,7 @@ public interface QuerySource {
     String getJobDataParameter();
     String getVersionParameter();
     String getPriorityParameter();
-    String getReferenceTimeParameter();
+    String getNowParameter();
     String getLimitParameter();
     String getIdsParameter();
 

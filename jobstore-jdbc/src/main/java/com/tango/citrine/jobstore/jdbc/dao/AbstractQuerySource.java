@@ -211,8 +211,8 @@ public abstract class AbstractQuerySource implements QuerySource {
     }
 
     @Override
-    public String getReferenceTimeParameter() {
-        return "reference_time";
+    public String getNowParameter() {
+        return "now";
     }
 
     @Override
