@@ -3,7 +3,7 @@ package com.tango.citrine.spring;
 import com.tango.citrine.jobstore.JobStore;
 import com.tango.citrine.jobstore.jdbc.JDBCJobStore;
 import com.tango.citrine.jobstore.jdbc.dao.JobStoreDAO;
-import com.tango.citrine.jobstore.jdbc.dao.NamedParameterJdbcTemplateDAO;
+import com.tango.citrine.jobstore.jdbc.dao.JobStoreDAOImpl;
 import com.tango.citrine.jobstore.jdbc.dao.QuerySource;
 import com.tango.citrine.jobstore.jdbc.dao.std.StdSQLQuerySource;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.DefaultJobClassMapper;
@@ -15,7 +15,6 @@ import com.tango.citrine.jobstore.jdbc.jobdata.JobDataEncoderDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -62,7 +61,7 @@ public class JDBCConfiguration extends AbstractJobStoreConfiguration {
         }
 
         DataSource dataSource = getRequiredBeanFromAttribute(DATASOURCE_ATTRIBUTE_NAME, DataSource.class);
-        JobStoreDAO dao = new NamedParameterJdbcTemplateDAO(new NamedParameterJdbcTemplate(dataSource), querySource);
+        JobStoreDAO dao = new JobStoreDAOImpl(new NamedParameterJdbcTemplate(dataSource), querySource);
 
         if(jobClassMapper == null) {
             jobClassMapper = new DefaultJobClassMapper();

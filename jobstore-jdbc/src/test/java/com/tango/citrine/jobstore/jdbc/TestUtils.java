@@ -3,7 +3,7 @@ package com.tango.citrine.jobstore.jdbc;
 import com.tango.citrine.jobstore.JobStore;
 import com.tango.citrine.jobstore.jdbc.dao.JDBCJob;
 import com.tango.citrine.jobstore.jdbc.dao.JobStoreDAO;
-import com.tango.citrine.jobstore.jdbc.dao.NamedParameterJdbcTemplateDAO;
+import com.tango.citrine.jobstore.jdbc.dao.JobStoreDAOImpl;
 import com.tango.citrine.jobstore.jdbc.dao.std.StdSQLQuerySource;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.DefaultJobClassMapper;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.JobClassMapper;
@@ -77,17 +77,22 @@ public class TestUtils {
     }
 
     public static JobStore createJobStore(DataSource dataSource, JobClassMapper jobClassMapper) {
-        JobStoreDAO dao = new NamedParameterJdbcTemplateDAO(new NamedParameterJdbcTemplate(dataSource), new StdSQLQuerySource("job"));
         TransactionOperations transactionOperations = createTransactionOperations(dataSource);
+        JobStoreDAO dao = createJobStoreDAO(dataSource);
         return new JDBCJobStore(transactionOperations, dao, jobClassMapper, new DefaultJobDataEncoderDecoder(),
                 new DefaultJobCompleter(dao, transactionOperations, createRetryOperations()));
     }
 
     public static JobStore createJobStore(DataSource dataSource, JobCompleter jobCompleter) {
-        JobStoreDAO dao = new NamedParameterJdbcTemplateDAO(new NamedParameterJdbcTemplate(dataSource), new StdSQLQuerySource("job"));
+        JobStoreDAO dao = new JobStoreDAOImpl(new NamedParameterJdbcTemplate(dataSource), new StdSQLQuerySource("job"));
         TransactionOperations transactionOperations = createTransactionOperations(dataSource);
         return new JDBCJobStore(transactionOperations, dao, new DefaultJobClassMapper(), new DefaultJobDataEncoderDecoder(),
                 jobCompleter);
+    }
+
+    public static JobStoreDAO createJobStoreDAO(DataSource dataSource) {
+        JobStoreDAO dao = new JobStoreDAOImpl(new NamedParameterJdbcTemplate(dataSource), new StdSQLQuerySource("job"));
+        return dao;
     }
 
     public static class ExceptionThrowingTransactionOperations implements TransactionOperations {

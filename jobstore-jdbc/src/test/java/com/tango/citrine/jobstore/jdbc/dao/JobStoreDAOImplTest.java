@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tango.citrine.jobstore.JobState;
 import com.tango.citrine.jobstore.TestJobClass1;
 import com.tango.citrine.jobstore.TestJobClass2;
+import com.tango.citrine.jobstore.jdbc.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,14 +18,13 @@ import static org.junit.Assert.*;
 /**
  * Created by per on 03/12/15.
  */
-public abstract class DAOTestBase {
+public class JobStoreDAOImplTest {
 
     private JobStoreDAO dao;
-    protected abstract JobStoreDAO createJobStoreDAO();
 
     @Before
     public void setup() {
-        dao = createJobStoreDAO();
+        dao = TestUtils.createJobStoreDAO(TestUtils.createDataSource());
     }
 
     @Test

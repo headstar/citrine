@@ -16,13 +16,13 @@ import java.util.List;
 /**
  * Created by per on 02/12/15.
  */
-public class NamedParameterJdbcTemplateDAO implements JobStoreDAO {
+public class JobStoreDAOImpl implements JobStoreDAO {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final QuerySource querySource;
     private final RowMapper<JDBCJob> rowMapper;
 
-    public NamedParameterJdbcTemplateDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate, QuerySource querySource) {
+    public JobStoreDAOImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate, QuerySource querySource) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.querySource = querySource;
         this.rowMapper = new JDBCJobRowMappper(querySource);
