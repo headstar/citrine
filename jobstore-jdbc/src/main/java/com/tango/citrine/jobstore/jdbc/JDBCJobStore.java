@@ -11,9 +11,11 @@ import com.tango.citrine.jobstore.jdbc.jobcompleter.JobCompleter;
 import com.tango.citrine.jobstore.jdbc.jobdata.JobDataEncoderDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessException;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
@@ -187,7 +189,7 @@ public class JDBCJobStore implements JobStore {
                     return res;
                 }
             });
-        } catch(RecoverableJobPersistenceException e) {
+        } catch(JobPersistenceException e) {
             return new ArrayList<TriggeredJob>();
         }
     }
@@ -213,10 +215,10 @@ public class JDBCJobStore implements JobStore {
     private <T> T executeInTransaction(TransactionCallback<T> callback) {
         try {
             return transactionOperations.execute(callback);
-        } catch(TransientDataAccessException e) {
-            throw new RecoverableJobPersistenceException(e);
-        } catch(RecoverableDataAccessException e) {
-            throw new RecoverableJobPersistenceException(e);
+        } catch(TransactionException e) {
+            throw new JobPersistenceException(e);
+        } catch(DataAccessException e) {
+            throw new JobPersistenceException(e);
         }
     }
 

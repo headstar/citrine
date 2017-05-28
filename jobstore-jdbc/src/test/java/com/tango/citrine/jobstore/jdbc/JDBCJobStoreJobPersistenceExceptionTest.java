@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 /**
  * Created by per on 11/01/16.
  */
-public class JDBCJobStoreRecoverablePersistenceExceptionTest {
+public class JDBCJobStoreJobPersistenceExceptionTest {
 
     @Test
     public void addJob() {
@@ -36,7 +36,7 @@ public class JDBCJobStoreRecoverablePersistenceExceptionTest {
                 fail("should have thrown exception");
             } catch(RuntimeException re) {
                 // then ..exception should be thrown
-                assertTrue(re instanceof RecoverableJobPersistenceException);
+                assertTrue(re instanceof JobPersistenceException);
                 assertTrue(re.getCause().equals(e));
             }
         }
@@ -56,7 +56,7 @@ public class JDBCJobStoreRecoverablePersistenceExceptionTest {
                 fail("should have thrown exception");
             } catch(RuntimeException re) {
                 // then ..exception should be thrown
-                assertTrue(re instanceof RecoverableJobPersistenceException);
+                assertTrue(re instanceof JobPersistenceException);
                 assertTrue(re.getCause().equals(e));
             }
         }
@@ -76,7 +76,7 @@ public class JDBCJobStoreRecoverablePersistenceExceptionTest {
                 fail("should have thrown exception");
             } catch(RuntimeException re) {
                 // then ..exception should be thrown
-                assertTrue(re instanceof RecoverableJobPersistenceException);
+                assertTrue(re instanceof JobPersistenceException);
                 assertTrue(re.getCause().equals(e));
             }
         }
@@ -96,7 +96,7 @@ public class JDBCJobStoreRecoverablePersistenceExceptionTest {
                 fail("should have thrown exception");
             } catch (RuntimeException re) {
                 // then ..exception should be thrown
-                assertTrue(re instanceof RecoverableJobPersistenceException);
+                assertTrue(re instanceof JobPersistenceException);
                 assertTrue(re.getCause().equals(e));
             }
         }
