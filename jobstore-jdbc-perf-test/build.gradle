@@ -15,8 +15,8 @@ dependencies {
     compile project(':citrine-jobstore-jdbc')
     compile('org.springframework.boot:spring-boot-starter')
     compile('org.springframework:spring-jdbc')
+    compile('com.zaxxer:HikariCP-java6:2.3.12')
 
     runtime('mysql:mysql-connector-java')
-    runtime('com.zaxxer:HikariCP-java6:2.3.12')
     runtime('org.flywaydb:flyway-core')
 }
