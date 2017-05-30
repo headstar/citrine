@@ -12,4 +12,4 @@ CREATE TABLE `job` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `job` ADD INDEX `next_execution_time_index` (`next_execution_time`);
+ALTER TABLE `job` ADD INDEX `next_execution_time_priority_index` (`next_execution_time`, `priority`);

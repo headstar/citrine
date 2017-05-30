@@ -37,7 +37,10 @@ public class ThreadPoolExecutorJobRunner implements JobRunner {
 
     @Override
     public int maxRunnablesAccepted() {
-        return executor.getMaximumPoolSize() - executor.getActiveCount();
+        int num = (executor.getMaximumPoolSize() - executor.getActiveCount()) + executor.getQueue().remainingCapacity();
+        if(num < 500)
+            return 0;
+        return num;
     }
 
     @Override

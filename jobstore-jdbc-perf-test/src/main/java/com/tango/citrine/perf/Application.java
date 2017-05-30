@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -28,6 +32,7 @@ public class Application implements CommandLineRunner {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
 
+    public static String LATCH_NAME = "latch";
     private static final AtomicLong jobIdCounter = new AtomicLong();
 
     public static void main(String[] args) {
@@ -36,14 +41,67 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        final int NUMBER_OF_JOBS = 500000;
+        //createJobs();
+
+        executeJobs();
+    }
+
+    private void executeJobs() throws InterruptedException {
+        final int NUMBER_OF_SCHEDULERS = 1;
+        final int LATCH_START = 100000;
+        CountDownLatch latch = new CountDownLatch(LATCH_START);
+
+        SchedulerContext schedulerContext = new SchedulerContext();
+        schedulerContext.put(LATCH_NAME, latch);
+
+        List<DataSource> dataSources = MySQLDataSourceFactory.createDataSources(NUMBER_OF_SCHEDULERS);
+        List<Scheduler> schedulers = new ArrayList<>();
+        for(int i=0; i<NUMBER_OF_SCHEDULERS; ++i) {
+            Scheduler scheduler = SchedulerHelper.createScheduler(dataSources.get(i), schedulerContext);
+            schedulers.add(scheduler);
+        }
+
+        try {
+            logger.info("Starting schedulers: count={}", NUMBER_OF_SCHEDULERS);
+            for(Scheduler scheduler : schedulers) {
+                scheduler.start();
+            }
+
+            do {
+                logger.info("Waiting for all jobs to have been executed: jobsLeftCount = {}", latch.getCount());
+            } while(!latch.await(10, TimeUnit.SECONDS));
+        } finally {
+            ExecutorService executorService = null;
+            try {
+                executorService = Executors.newFixedThreadPool(NUMBER_OF_SCHEDULERS);
+                for (final Scheduler scheduler : schedulers) {
+                    executorService.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            scheduler.shutdown(true);
+                        }
+                    });
+                }
+
+            } finally {
+                executorService.shutdown();
+                executorService.awaitTermination(60, TimeUnit.SECONDS);
+            }
+            for(DataSource ds : dataSources) {
+                MySQLDataSourceFactory.close(ds);
+            }
+        }
+    }
+
+    private void createJobs() {
+        final int NUMBER_OF_JOBS = 1000000;
 
         DataSource dataSource = null;
         Scheduler scheduler = null;
 
         try {
             dataSource = MySQLDataSourceFactory.createDataSource();
-            scheduler = SchedulerHelper.createScheduler(dataSource);
+            scheduler = SchedulerHelper.createScheduler(dataSource, new SchedulerContext());
 
             logger.info("Creating jobs: count={}", NUMBER_OF_JOBS);
             long start = System.currentTimeMillis();
@@ -62,6 +120,7 @@ public class Application implements CommandLineRunner {
     private void createJobs(final Scheduler scheduler, final int numberOfJobs) {
         DataSource dataSource = null;
         try {
+            final Date now = new Date();
             dataSource = MySQLDataSourceFactory.createDataSource();
             TransactionOperations transactionOperations = SchedulerHelper.createTransactionOperations(dataSource);
             final Random rng = new Random(System.currentTimeMillis());
@@ -74,8 +133,9 @@ public class Application implements CommandLineRunner {
                         List<JobDetail> jobs = new ArrayList<JobDetail>(batchSize);
                         for (int j = 0; j < batchSize; ++j) {
                             JobKey jobKey = new JobKey(String.valueOf(System.currentTimeMillis()) + "-" + jobIdCounter.incrementAndGet());
-                            Date d = new Date();
-                            JobDetail jd = new JobDetail(jobKey, TestJob.class, new SimpleTrigger(d), new JobData(), (short) rng.nextInt(3));
+                            int sign = rng.nextInt(100) > 70 ? -1 : 1;
+                            Date scheduleAt = new Date(now.getTime() + sign * 1000 * rng.nextInt(1000));
+                            JobDetail jd = new JobDetail(jobKey, TestJob.class, new SimpleTrigger(scheduleAt), new JobData(), (short) rng.nextInt(3));
                             jobs.add(jd);
                         }
                         try {

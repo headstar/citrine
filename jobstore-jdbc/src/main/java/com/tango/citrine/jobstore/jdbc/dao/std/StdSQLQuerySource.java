@@ -7,7 +7,7 @@ import com.tango.citrine.jobstore.jdbc.dao.AbstractQuerySource;
  */
 public class StdSQLQuerySource extends AbstractQuerySource {
 
-    private static final String SELECT_TRIGGERED_TEMPLATE = "SELECT * FROM %s WHERE next_execution_time < :now AND job_state = 'WAITING' ORDER BY next_execution_time ASC, priority DESC LIMIT :limit FOR UPDATE";
+    private static final String SELECT_TRIGGERED_TEMPLATE = "SELECT * FROM %s WHERE next_execution_time < :now AND job_state = 'WAITING' ORDER BY next_execution_time ASC, priority ASC LIMIT :limit FOR UPDATE";
 
     public StdSQLQuerySource(String tableName) {
         super(tableName);

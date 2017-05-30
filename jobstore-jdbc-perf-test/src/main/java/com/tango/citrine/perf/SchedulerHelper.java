@@ -19,6 +19,7 @@ import com.tango.citrine.jobstore.jdbc.jobclassmapper.DefaultJobClassMapper;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.JobClassMapper;
 import com.tango.citrine.jobstore.jdbc.jobcompleter.DefaultJobCompleter;
 import com.tango.citrine.jobstore.jdbc.jobdata.DefaultJobDataEncoderDecoder;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -45,7 +46,7 @@ public class SchedulerHelper {
 
     private SchedulerHelper() {}
 
-    public static Scheduler createScheduler(DataSource dataSource) {
+    public static Scheduler createScheduler(DataSource dataSource, SchedulerContext schedulerContext) {
         SchedulerConfiguration configuration = new MutableSchedulerConfiguration(1000, 10000);
         BiMap<Class<? extends Job>, String> mappings = HashBiMap.create();
         mappings.put(TestJob.class, "testjob");
@@ -55,7 +56,7 @@ public class SchedulerHelper {
                 configuration,
                 createJobStore(dataSource, jobClassMapper),
                 new ThreadPoolExecutorJobRunner((ThreadPoolExecutor) executor),
-                new SchedulerContext());
+                schedulerContext);
     }
 
     public static JobStore createJobStore(DataSource dataSource, JobClassMapper jobClassMapper) {
@@ -78,7 +79,7 @@ public class SchedulerHelper {
 
     private static RetryOperations createRetryOperations() {
         Map<Class<? extends Throwable>, Boolean> policyMap = new HashMap<Class<? extends Throwable>, Boolean>();
-        policyMap.put(JobPersistenceException.class, true);
+        policyMap.put(DataAccessException.class, true);
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(100,  // we really want this to succeed!
                 policyMap, true);
 
