@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Per Johansson
  */
 @SpringBootApplication
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class Application implements CommandLineRunner {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
@@ -41,7 +40,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //createJobs();
+        createJobs();
 
         executeJobs();
     }
