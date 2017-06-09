@@ -2,6 +2,10 @@ package com.tango.citrine.perf;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.headstartech.burro.BatchingWorkQueue;
+import com.headstartech.burro.BatchingWorkQueueConfiguration;
+import com.headstartech.burro.MutableBatchingWorkQueueConfiguration;
+import com.headstartech.burro.WorkQueue;
 import com.tango.citrine.Job;
 import com.tango.citrine.JobPersistenceException;
 import com.tango.citrine.Scheduler;
@@ -17,6 +21,9 @@ import com.tango.citrine.jobstore.jdbc.dao.JobStoreDAOImpl;
 import com.tango.citrine.jobstore.jdbc.dao.std.StdSQLQuerySource;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.DefaultJobClassMapper;
 import com.tango.citrine.jobstore.jdbc.jobclassmapper.JobClassMapper;
+import com.tango.citrine.jobstore.jdbc.jobcompleter.AsyncJobCompleter;
+import com.tango.citrine.jobstore.jdbc.jobcompleter.CompletedJobItem;
+import com.tango.citrine.jobstore.jdbc.jobcompleter.CompletedJobItemProcessor;
 import com.tango.citrine.jobstore.jdbc.jobcompleter.DefaultJobCompleter;
 import com.tango.citrine.jobstore.jdbc.jobdata.DefaultJobDataEncoderDecoder;
 import org.springframework.dao.DataAccessException;
@@ -46,13 +53,13 @@ public class SchedulerHelper {
 
     private SchedulerHelper() {}
 
-    public static Scheduler createScheduler(DataSource dataSource, SchedulerContext schedulerContext) {
-        SchedulerConfiguration configuration = new MutableSchedulerConfiguration(1000, 10000);
+    public static Scheduler createScheduler(DataSource dataSource, SchedulerContext schedulerContext, int schedulerIndex) {
+        SchedulerConfiguration configuration = new MutableSchedulerConfiguration(100, 10000);
         BiMap<Class<? extends Job>, String> mappings = HashBiMap.create();
         mappings.put(TestJob.class, "testjob");
         DefaultJobClassMapper jobClassMapper = new DefaultJobClassMapper(mappings);
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(2000));
-        return new SchedulerImpl(String.format("scheduler-%d", 0),
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 5, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(3000));
+        return new SchedulerImpl(String.format("scheduler-%d", schedulerIndex),
                 configuration,
                 createJobStore(dataSource, jobClassMapper),
                 new ThreadPoolExecutorJobRunner((ThreadPoolExecutor) executor),
@@ -63,7 +70,22 @@ public class SchedulerHelper {
         TransactionOperations transactionOperations = createTransactionOperations(dataSource);
         JobStoreDAO dao = createJobStoreDAO(dataSource);
         return new JDBCJobStore(transactionOperations, dao, jobClassMapper, new DefaultJobDataEncoderDecoder(),
-                new DefaultJobCompleter(dao, transactionOperations, createRetryOperations()));
+                new AsyncJobCompleter(createWorkQueue(transactionOperations, dao)));
+    }
+
+    private static WorkQueue<CompletedJobItem> createWorkQueue(TransactionOperations transactionOperations, JobStoreDAO dao) {
+        BatchingWorkQueueConfiguration conf = new MutableBatchingWorkQueueConfiguration("jobCompleter",
+                1000,
+                1000,
+                1000,
+                1000,
+                true,
+                1000);
+        WorkQueue<CompletedJobItem> workQueue = new BatchingWorkQueue<>(conf,
+                new ArrayBlockingQueue<CompletedJobItem>(1000),
+                new CompletedJobItemProcessor(dao, transactionOperations, createRetryOperations()));
+        return workQueue;
+
     }
 
     public static JobStoreDAO createJobStoreDAO(DataSource dataSource) {

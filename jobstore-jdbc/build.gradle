@@ -8,6 +8,7 @@ dependencies {
     compile project(':citrine-core')
     compile "org.springframework:spring-jdbc:$springVersion"
     compile "org.springframework.retry:spring-retry:$springRetryVersion"
+    compile 'com.headstartech.burro:burro:1.0.0.RELEASE'
 
     testCompile project(':citrine-jobstore-common-test')
     testCompile "junit:junit:$junitVersion"

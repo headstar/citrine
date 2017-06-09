@@ -46,7 +46,7 @@ public class Application implements CommandLineRunner {
     }
 
     private void executeJobs() throws InterruptedException {
-        final int NUMBER_OF_SCHEDULERS = 1;
+        final int NUMBER_OF_SCHEDULERS = 10;
         final int LATCH_START = 100000;
         CountDownLatch latch = new CountDownLatch(LATCH_START);
 
@@ -56,22 +56,26 @@ public class Application implements CommandLineRunner {
         List<DataSource> dataSources = MySQLDataSourceFactory.createDataSources(NUMBER_OF_SCHEDULERS);
         List<Scheduler> schedulers = new ArrayList<>();
         for(int i=0; i<NUMBER_OF_SCHEDULERS; ++i) {
-            Scheduler scheduler = SchedulerHelper.createScheduler(dataSources.get(i), schedulerContext);
+            Scheduler scheduler = SchedulerHelper.createScheduler(dataSources.get(i), schedulerContext, i);
             schedulers.add(scheduler);
         }
 
+        long start = 0;
+        long end;
         try {
             logger.info("Starting schedulers: count={}", NUMBER_OF_SCHEDULERS);
             for(Scheduler scheduler : schedulers) {
                 scheduler.start();
             }
 
+            start = System.currentTimeMillis();
             do {
                 logger.info("Waiting for all jobs to have been executed: jobsLeftCount = {}", latch.getCount());
             } while(!latch.await(10, TimeUnit.SECONDS));
         } finally {
             ExecutorService executorService = null;
             try {
+                logger.info("Stopping schedulers: count={}", NUMBER_OF_SCHEDULERS);
                 executorService = Executors.newFixedThreadPool(NUMBER_OF_SCHEDULERS);
                 for (final Scheduler scheduler : schedulers) {
                     executorService.submit(new Runnable() {
@@ -81,11 +85,13 @@ public class Application implements CommandLineRunner {
                         }
                     });
                 }
-
             } finally {
                 executorService.shutdown();
                 executorService.awaitTermination(60, TimeUnit.SECONDS);
             }
+            end = System.currentTimeMillis();
+            logger.info("Rate {} jobs/s", (LATCH_START/ ((end - start)/ 1000)));
+
             for(DataSource ds : dataSources) {
                 MySQLDataSourceFactory.close(ds);
             }
@@ -100,7 +106,7 @@ public class Application implements CommandLineRunner {
 
         try {
             dataSource = MySQLDataSourceFactory.createDataSource();
-            scheduler = SchedulerHelper.createScheduler(dataSource, new SchedulerContext());
+            scheduler = SchedulerHelper.createScheduler(dataSource, new SchedulerContext(), 0);
 
             logger.info("Creating jobs: count={}", NUMBER_OF_JOBS);
             long start = System.currentTimeMillis();

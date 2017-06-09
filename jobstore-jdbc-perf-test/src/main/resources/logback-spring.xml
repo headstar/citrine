@@ -5,7 +5,12 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
 
-    <logger name="com.tango" level="INFO"/>
+<!--
+    <logger name="com.tango.citrine.core" level="DEBUG"/>
+-->
+<!--
+    <logger name="com.headstartech.burro" level="DEBUG"/>
+-->
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

@@ -45,6 +45,7 @@ public class ThreadPoolExecutorJobRunner implements JobRunner {
 
     @Override
     public void shutdown(boolean waitForJobsToComplete) {
+        logger.info("Shutting down job runner: waitForJobsToComplete={}", waitForJobsToComplete);
         executor.shutdown();
         if(waitForJobsToComplete) {
             boolean interrupted = false;
@@ -60,5 +61,6 @@ public class ThreadPoolExecutorJobRunner implements JobRunner {
                 }
             }
         }
+        logger.info("Job runner shut down");
     }
 }
