@@ -32,7 +32,10 @@ public class Application implements CommandLineRunner {
     private static Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static String LATCH_NAME = "latch";
+    public static String COUNTER_NAME = "counter";
+
     private static final AtomicLong jobIdCounter = new AtomicLong();
+    private static final AtomicLong jobsExecuted = new AtomicLong();
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -52,6 +55,7 @@ public class Application implements CommandLineRunner {
 
         SchedulerContext schedulerContext = new SchedulerContext();
         schedulerContext.put(LATCH_NAME, latch);
+        schedulerContext.put(COUNTER_NAME, jobsExecuted);
 
         List<DataSource> dataSources = MySQLDataSourceFactory.createDataSources(NUMBER_OF_SCHEDULERS);
         List<Scheduler> schedulers = new ArrayList<>();
@@ -70,7 +74,7 @@ public class Application implements CommandLineRunner {
 
             start = System.currentTimeMillis();
             do {
-                logger.info("Waiting for all jobs to have been executed: jobsLeftCount = {}", latch.getCount());
+                logger.info("Waiting for all jobs to have been executed: count = {}", jobsExecuted.get());
             } while(!latch.await(10, TimeUnit.SECONDS));
         } finally {
             ExecutorService executorService = null;
@@ -90,7 +94,7 @@ public class Application implements CommandLineRunner {
                 executorService.awaitTermination(60, TimeUnit.SECONDS);
             }
             end = System.currentTimeMillis();
-            logger.info("Rate {} jobs/s", (LATCH_START/ ((end - start)/ 1000)));
+            logger.info("Rate {} jobs/s, jobs {}", (jobsExecuted.get()/ ((end - start)/ 1000)), jobsExecuted.get());
 
             for(DataSource ds : dataSources) {
                 MySQLDataSourceFactory.close(ds);
