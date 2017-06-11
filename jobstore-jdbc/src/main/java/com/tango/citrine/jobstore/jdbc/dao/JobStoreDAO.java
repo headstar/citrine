@@ -19,6 +19,8 @@ public interface JobStoreDAO {
 
     boolean delete(String jobId, int version);
 
+    void delete(List<String> jobIds, int version);
+
     boolean exists(String jobId);
 
     JDBCJob get(String jobId);

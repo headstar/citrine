@@ -76,13 +76,13 @@ public class SchedulerHelper {
     private static WorkQueue<CompletedJobItem> createWorkQueue(TransactionOperations transactionOperations, JobStoreDAO dao) {
         BatchingWorkQueueConfiguration conf = new MutableBatchingWorkQueueConfiguration("jobCompleter",
                 1000,
-                1000,
+                5000,
                 1000,
                 1000,
                 true,
                 1000);
         WorkQueue<CompletedJobItem> workQueue = new BatchingWorkQueue<>(conf,
-                new ArrayBlockingQueue<CompletedJobItem>(1000),
+                new ArrayBlockingQueue<CompletedJobItem>(5000),
                 new CompletedJobItemProcessor(dao, transactionOperations, createRetryOperations()));
         return workQueue;
 

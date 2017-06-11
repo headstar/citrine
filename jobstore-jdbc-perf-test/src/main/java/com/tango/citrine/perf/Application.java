@@ -143,7 +143,7 @@ public class Application implements CommandLineRunner {
                         for (int j = 0; j < batchSize; ++j) {
                             JobKey jobKey = new JobKey(String.valueOf(System.currentTimeMillis()) + "-" + jobIdCounter.incrementAndGet());
                             int sign = rng.nextInt(100) > 70 ? -1 : 1;
-                            Date scheduleAt = new Date(now.getTime() + sign * 1000 * rng.nextInt(1000));
+                            Date scheduleAt = new Date(now.getTime() + sign * 1000000 * (rng.nextInt(200) + 1));
                             JobDetail jd = new JobDetail(jobKey, TestJob.class, new SimpleTrigger(scheduleAt), new JobData(), (short) rng.nextInt(3));
                             jobs.add(jd);
                         }

@@ -50,6 +50,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                     }
                 }
         );
+        final List<String> jobsToDelete = new ArrayList<String>();
         retryOperations.execute(new RetryCallback<Object, RuntimeException>() {
             @Override
             public Object doWithRetry(RetryContext context) throws RuntimeException {
@@ -57,8 +58,11 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                     @Override
                     public Void doInTransaction(TransactionStatus status) {
                         for(CompletedJobItem item : sorted) {
-                            doCompleteJob(item.getTriggeredJob(), item.getAction());
+                            if(doCompleteJob(item.getTriggeredJob(), item.getAction())) {
+                                jobsToDelete.add(item.getTriggeredJob().getJobDetail().getJobKey().getKey());
+                            }
                         }
+                        dao.delete(jobsToDelete, 1);
                         return null;
                     }
                 });
@@ -68,7 +72,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
         logger.debug("Processing completed");
     }
 
-    protected void doCompleteJob(VersionedTriggeredJob triggeredJob, TriggeredJobCompleteAction action) {
+    protected boolean doCompleteJob(VersionedTriggeredJob triggeredJob, TriggeredJobCompleteAction action) {
         JobDetail jobDetail = triggeredJob.getJobDetail();
         JobKey jobKey = jobDetail.getJobKey();
 
@@ -77,7 +81,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
             if(nextExecutionTimeOpt.isPresent()) {
                 JDBCJob job = dao.get(jobKey.getKey());
                 if (job == null) {
-                    return;
+                    return false;
                 }
                 job.setNextExecutionTime(nextExecutionTimeOpt.get());
                 job.setJobState(JobState.WAITING);
@@ -87,12 +91,12 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                     logger.debug("Job has been updated concurrently, action not executed: jobKey={}, action={}", jobKey, action);
                 }
             } else {
-                deleteJob(triggeredJob);
+                return true;
             }
         } else if (TriggeredJobCompleteAction.SET_JOB_WAITING.equals(action)) {
             JDBCJob job = dao.get(jobKey.getKey());
             if (job == null) {
-                return;
+                return false;
             }
             job.setJobState(JobState.WAITING);
             job.setVersion(triggeredJob.getExpectedVersionIfNoUpdate());
@@ -103,7 +107,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
         } else if (TriggeredJobCompleteAction.SET_JOB_ERROR.equals(action)) {
             JDBCJob job = dao.get(jobKey.getKey());
             if (job == null) {
-                return;
+                return false;
             }
             job.setJobState(JobState.ERROR);
             job.setVersion(triggeredJob.getExpectedVersionIfNoUpdate());
@@ -112,6 +116,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                 logger.debug("Job has been updated concurrently, action not executed: jobKey={}, action={}", jobKey, action);
             }
         }
+        return false;
     }
 
     protected void deleteJob(VersionedTriggeredJob versionedTriggeredJob) {

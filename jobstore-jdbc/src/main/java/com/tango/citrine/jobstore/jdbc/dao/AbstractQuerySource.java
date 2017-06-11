@@ -116,6 +116,11 @@ public abstract class AbstractQuerySource implements QuerySource {
     }
 
     @Override
+    public String getDeleteListWithVersionSQL() {
+        return "DELETE FROM job WHERE id IN (:jobs) AND version = :version";
+    }
+
+    @Override
     public String getSelectSQL() {
         return selectSQL;
     }

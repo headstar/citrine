@@ -77,6 +77,15 @@ public class JobStoreDAOImpl implements JobStoreDAO {
     }
 
     @Override
+    public void delete(List<String> jobIds, int version) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("jobs", jobIds);
+        namedParameters.addValue("version", version);
+
+        namedParameterJdbcTemplate.update(querySource.getDeleteListWithVersionSQL(), namedParameters);
+    }
+
+    @Override
     public boolean exists(String jobId) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue(querySource.getIdParameter(), jobId);

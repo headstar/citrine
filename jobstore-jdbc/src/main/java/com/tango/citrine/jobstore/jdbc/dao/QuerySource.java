@@ -8,6 +8,7 @@ public interface QuerySource {
     String getInsertSQL();
     String getDeleteSQL();
     String getDeleteWithVersionSQL();
+    String getDeleteListWithVersionSQL();
     String getSelectSQL();
     String getSelectExistsSQL();
     String getUpdateSQL();
