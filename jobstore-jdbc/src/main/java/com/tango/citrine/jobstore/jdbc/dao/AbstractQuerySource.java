@@ -12,10 +12,12 @@ public abstract class AbstractQuerySource implements QuerySource {
     private static final String SELECT_JOB_EXISTS_SQL_TEMPLATE = "SELECT COUNT(id) FROM %s WHERE id = :id";
     private static final String UPDATE_JOB_SQL_TEMPLATE = "UPDATE %s SET updated_time = :now, job_state = :job_state, next_execution_time = :next_execution_time, cron_expression = :cron_expression, job_class = :job_class, priority = :priority, job_data = :job_data, version = version + 1 WHERE id = :id AND version = :version";
     private static final String SET_AS_EXECUTING_SQL_TEMPLATE = "UPDATE %s SET updated_time = :now, job_state = 'EXECUTING', version = version + 1 WHERE id IN(:ids)";
+    private static final String DELETE_JOB_LIST_WITH_VERSION_SQL_TEMPLATE = "DELETE FROM %s WHERE id IN (:jobs) AND version = :version";
 
     private final String insertSQL;
     private final String deleteSQL;
     private final String deleteWithVersionSQL;
+    private final String deleteListWithVersionSQL;
     private final String selectSQL;
     private final String selectExistsSQL;
     private final String updateSQL;
@@ -26,6 +28,7 @@ public abstract class AbstractQuerySource implements QuerySource {
         insertSQL = createInsertSQL(tableName);
         deleteSQL = createDeleteSQL(tableName);
         deleteWithVersionSQL = createDeleteWithVersionSQL(tableName);
+        deleteListWithVersionSQL = createDeleteListWithVersionSQL(tableName);
         selectSQL = createSelectSQL(tableName);
         selectExistsSQL = createSelectExistsSQL(tableName);
         updateSQL = createUpdateSQL(tableName);
@@ -65,6 +68,10 @@ public abstract class AbstractQuerySource implements QuerySource {
         return String.format(getSetAsExecutingSQLTemplate(), tableName);
     }
 
+    protected String createDeleteListWithVersionSQL(String tableName) {
+        return String.format(getDeleteListWithVersionSQLTemplate(), tableName);
+    }
+
     protected String getInsertSQLTemplate() {
         return INSERT_JOB_SQL_TEMPLATE;
     }
@@ -93,6 +100,10 @@ public abstract class AbstractQuerySource implements QuerySource {
         return SET_AS_EXECUTING_SQL_TEMPLATE;
     }
 
+    protected String getDeleteListWithVersionSQLTemplate() {
+            return DELETE_JOB_LIST_WITH_VERSION_SQL_TEMPLATE;
+    }
+
     protected abstract String getSelectTriggeredSQLTemplate();
 
     @Override
@@ -117,7 +128,7 @@ public abstract class AbstractQuerySource implements QuerySource {
 
     @Override
     public String getDeleteListWithVersionSQL() {
-        return "DELETE FROM job WHERE id IN (:jobs) AND version = :version";
+        return deleteListWithVersionSQL;
     }
 
     @Override
@@ -233,6 +244,11 @@ public abstract class AbstractQuerySource implements QuerySource {
     @Override
     public String getIdsParameter() {
         return "ids";
+    }
+
+    @Override
+    public String getJobsParameter() {
+        return "jobs";
     }
 
 }

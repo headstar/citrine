@@ -35,5 +35,5 @@ public interface QuerySource {
     String getNowParameter();
     String getLimitParameter();
     String getIdsParameter();
-
+    String getJobsParameter();
 }
