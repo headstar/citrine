@@ -74,7 +74,6 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                 return null;
             }
         });
-        logger.debug("Processing completed");
     }
 
     protected boolean doCompleteJob(VersionedTriggeredJob triggeredJob, TriggeredJobCompleteAction action) {
@@ -124,12 +123,4 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
         return false;
     }
 
-    protected void deleteJob(VersionedTriggeredJob versionedTriggeredJob) {
-        JobDetail jobDetail = versionedTriggeredJob.getJobDetail();
-        JobKey jobKey = jobDetail.getJobKey();
-        boolean res = dao.delete(jobKey.getKey(), versionedTriggeredJob.getExpectedVersionIfNoUpdate());
-        if(!res) {
-            logger.debug("Job has been updated concurrently, action not executed: jobKey={}, action={}", jobKey, TriggeredJobCompleteAction.DELETE_OR_RESCHEDULE_JOB);
-        }
-    }
 }
