@@ -34,7 +34,7 @@ configure(javaTestCoverageProjects) {
 configure(javaReleaseProjects) {
     apply plugin: 'maven'
 
-    group = "com.tango.citrine"
+    group = "com.headstartech.citrine"
 
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'

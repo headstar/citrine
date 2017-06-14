@@ -6,7 +6,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.tango.citrine" level="DEBUG" additivity="false">
+    <logger name="com.headstartech.citrine" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

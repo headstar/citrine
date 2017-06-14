@@ -6,7 +6,7 @@
 
 
 <!--
-    <logger name="com.tango.citrine.core" level="DEBUG"/>
+    <logger name="com.headstartechtartech.citrine.core" level="DEBUG"/>
 -->
 <!--
     <logger name="com.headstartech.burro" level="DEBUG"/>
