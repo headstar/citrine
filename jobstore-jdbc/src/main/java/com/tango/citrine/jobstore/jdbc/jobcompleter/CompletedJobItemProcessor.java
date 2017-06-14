@@ -18,6 +18,8 @@ import org.springframework.retry.RetryOperations;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
@@ -50,7 +52,7 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                     }
                 }
         );
-        final List<String> jobsToDelete = new ArrayList<String>();
+        final MultiValueMap<Integer, String> jobsToDelete = new LinkedMultiValueMap<Integer, String>();
         retryOperations.execute(new RetryCallback<Object, RuntimeException>() {
             @Override
             public Object doWithRetry(RetryContext context) throws RuntimeException {
@@ -59,10 +61,13 @@ public class CompletedJobItemProcessor implements WorkProcessor<Collection<Compl
                     public Void doInTransaction(TransactionStatus status) {
                         for(CompletedJobItem item : sorted) {
                             if(doCompleteJob(item.getTriggeredJob(), item.getAction())) {
-                                jobsToDelete.add(item.getTriggeredJob().getJobDetail().getJobKey().getKey());
+                                jobsToDelete.add(item.getTriggeredJob().getExpectedVersionIfNoUpdate(),
+                                        item.getTriggeredJob().getJobDetail().getJobKey().getKey());
                             }
                         }
-                        dao.delete(jobsToDelete, 1);
+                        for(Map.Entry<Integer, List<String>> entry : jobsToDelete.entrySet()) {
+                            dao.delete(entry.getValue(), entry.getKey());
+                        }
                         return null;
                     }
                 });
