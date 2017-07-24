@@ -29,6 +29,7 @@ class SchedulerImplWorkerThread extends Thread {
 
     private final Object sigLock = new Object();
     private final AtomicBoolean halted;
+    private boolean paused;
     private final SchedulerConfiguration schedulerConfiguration;
     private final Random random = new Random();
 
@@ -38,12 +39,29 @@ class SchedulerImplWorkerThread extends Thread {
         this.jobStore = jobStore;
         halted = new AtomicBoolean(false);
         this.schedulerConfiguration = schedulerConfiguration;
+
+        // start in 'paused' state
+        this.paused = true;
     }
 
     @Override
     public void run() {
         while (!halted.get()) {
             try {
+                // wait if we're paused
+                synchronized (sigLock) {
+                    while (paused && !halted.get()) {
+                        try {
+                            sigLock.wait(1000L);
+                        } catch (InterruptedException ignore) {
+                        }
+                    }
+
+                    if (halted.get()) {
+                        break;
+                    }
+                }
+
                 int maxRunnablesAccepted = jobRunner.maxRunnablesAccepted();
                 if (maxRunnablesAccepted > 0) {
                     int batchSize = Math.min(maxRunnablesAccepted, schedulerConfiguration.getMaxBatchSize());
@@ -109,7 +127,9 @@ class SchedulerImplWorkerThread extends Thread {
     public void shutdown(boolean wait) {
         synchronized (sigLock) {
             halted.set(true);
-            sigLock.notifyAll();
+            if(paused) {
+                sigLock.notifyAll();
+            }
         }
 
         if (wait) {
@@ -131,7 +151,21 @@ class SchedulerImplWorkerThread extends Thread {
         }
     }
 
-    private long getRandomizedIdleWaitTime() {
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void togglePause(boolean pause) {
+        synchronized (sigLock) {
+            paused = pause;
+
+            if (!paused) {
+                sigLock.notifyAll();
+            }
+        }
+    }
+
+    protected long getRandomizedIdleWaitTime() {
         int idleWaitVariableness = (int) (schedulerConfiguration.getIdleWaitTime() * 0.2);
         if(idleWaitVariableness > 0) {
             return schedulerConfiguration.getIdleWaitTime() - random.nextInt(idleWaitVariableness);

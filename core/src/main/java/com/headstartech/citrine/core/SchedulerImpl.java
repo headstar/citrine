@@ -17,7 +17,7 @@ public class SchedulerImpl implements Scheduler {
 
     private final Logger logger = LoggerFactory.getLogger(SchedulerImpl.class);
 
-    private enum SchedulerState { CREATED, RUNNING, SHUTTING_DOWN, CLOSED };
+    private enum SchedulerState { CREATED, SHUTTING_DOWN, CLOSED };
 
     private final SchedulerImplWorkerThread schedulerImplWorkerThread;
     private final JobStore jobStore;
@@ -38,11 +38,13 @@ public class SchedulerImpl implements Scheduler {
         this.jobRunner = jobRunner;
         this.schedulerContext = schedulerContext;
         this.schedulerName = schedulerName;
+        this.schedulerState = SchedulerState.CREATED;
+        this.listenerRegistry = new ListenerRegistryImpl();
+
         this.schedulerImplWorkerThread = new SchedulerImplWorkerThread(configuration, jobStore, jobRunner, this);
         this.schedulerImplWorkerThread.setName(String.format("%s-worker-thread", this.schedulerName));
         this.schedulerImplWorkerThread.setDaemon(true);
-        this.schedulerState = SchedulerState.CREATED;
-        this.listenerRegistry = new ListenerRegistryImpl();
+        this.schedulerImplWorkerThread.start();
     }
 
     @Override
@@ -114,13 +116,20 @@ public class SchedulerImpl implements Scheduler {
             throw new SchedulerException("The scheduler cannot be started after shutdown() has been called.");
         }
 
-        if(SchedulerState.RUNNING.equals(schedulerState)) {
-            return;
-        }
+        schedulerImplWorkerThread.togglePause(false);
+        logger.info("Scheduler started: schedulerName={}", schedulerName);
+    }
 
-        logger.info("Starting scheduler: schedulerName={}", schedulerName);
-        schedulerImplWorkerThread.start();
-        schedulerState = SchedulerState.RUNNING;
+    @Override
+    public void pause() {
+        schedulerImplWorkerThread.togglePause(true);
+        logger.info("Scheduler paused: schedulerName={}", schedulerName);
+
+    }
+
+    @Override
+    public boolean isPaused() {
+        return schedulerImplWorkerThread.isPaused();
     }
 
     @Override
@@ -130,10 +139,6 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public synchronized void shutdown(boolean waitForJobsToComplete) {
-        if(!schedulerState.equals(SchedulerState.RUNNING)) {
-            return;
-        }
-
         schedulerState = SchedulerState.SHUTTING_DOWN;
         logger.info("Shutting down scheduler: schedulerName={}, waitForJobsToComplete={}", schedulerName, waitForJobsToComplete);
         try {

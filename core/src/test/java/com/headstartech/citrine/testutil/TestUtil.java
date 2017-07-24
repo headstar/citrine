@@ -88,6 +88,16 @@ public class TestUtil {
         }
 
         @Override
+        public void pause() {
+
+        }
+
+        @Override
+        public boolean isPaused() {
+            return false;
+        }
+
+        @Override
         public ListenerRegistry getListenerRegistry() {
             return listenerRegistry;
         }

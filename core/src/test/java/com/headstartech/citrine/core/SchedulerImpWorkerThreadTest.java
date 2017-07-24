@@ -49,6 +49,7 @@ public class SchedulerImpWorkerThreadTest {
             jobsExecuted.setExpectedNumberOfJobsToBeExecuted(1);
 
             workerThread = new SchedulerImplWorkerThread(schedulerConf, jobStoreMock, new SerialJobRunner(), scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();
@@ -80,6 +81,7 @@ public class SchedulerImpWorkerThreadTest {
 
             Scheduler scheduler = TestUtil.createJobSchedulerStub();
             workerThread = new SchedulerImplWorkerThread(schedulerConf, jobStoreMock, jobRunnerMock, scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();
@@ -104,6 +106,7 @@ public class SchedulerImpWorkerThreadTest {
         SchedulerImplWorkerThread workerThread = new SchedulerImplWorkerThread(schedulerConf, jobStoreMock, new SerialJobRunner(), scheduler);
 
         workerThread.start();
+        workerThread.togglePause(false);
         Thread.sleep(1000);  // let thread run for a while
 
         // when
@@ -125,6 +128,7 @@ public class SchedulerImpWorkerThreadTest {
 
             Scheduler scheduler = TestUtil.createJobSchedulerStub();
             workerThread = new SchedulerImplWorkerThread(schedulerConf, jobStoreMock, new SerialJobRunner(), scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();
@@ -155,6 +159,7 @@ public class SchedulerImpWorkerThreadTest {
 
             Scheduler scheduler = TestUtil.createJobSchedulerStub();
             workerThread = new SchedulerImplWorkerThread(schedulerConf, jobStoreMock, jobRunnerMock, scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();
@@ -187,6 +192,7 @@ public class SchedulerImpWorkerThreadTest {
 
             Scheduler scheduler = TestUtil.createJobSchedulerStub();
             workerThread = new SchedulerImplWorkerThread(new MutableSchedulerConfiguration(IDLE_WAIT_TIME, schedulerMaxBatchSize), jobStoreMock, jobRunnerMock, scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();
@@ -217,6 +223,7 @@ public class SchedulerImpWorkerThreadTest {
 
             Scheduler scheduler = TestUtil.createJobSchedulerStub();
             workerThread = new SchedulerImplWorkerThread(new MutableSchedulerConfiguration(IDLE_WAIT_TIME, schedulerMaxBatchSize), jobStoreMock, jobRunnerMock, scheduler);
+            workerThread.togglePause(false);
 
             // when
             workerThread.start();

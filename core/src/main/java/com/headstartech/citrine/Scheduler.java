@@ -69,7 +69,7 @@ public interface Scheduler {
     SchedulerContext getContext();
 
     /**
-     * Starts the scheduler's thread executing jobs. When the scheduler is first created, no job trigger will fire until this method has been called (but it is
+     * The scheduler will start executing jobs. When the scheduler is first created, no job trigger will fire until this method has been called (but it is
      * possible to schedule and remove jobs before start() has been called).
      *
      * The scheduler cannot be re-started.
@@ -83,6 +83,18 @@ public interface Scheduler {
      *
      */
     void shutdown();
+
+    /**
+     * Pauses the scheduler. No jobs will executed until started again.
+     */
+    void pause();
+
+    /**
+     * Returns {@code true} if the scheduler is paused.
+     *
+     * @return {@code true} if the scheduler is paused, {@code false} otherwise
+     */
+    boolean isPaused();
 
     /**
      * Stops the scheduler's firing of job triggers.
