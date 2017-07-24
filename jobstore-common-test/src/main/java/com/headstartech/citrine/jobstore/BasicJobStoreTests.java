@@ -276,8 +276,8 @@ public abstract class BasicJobStoreTests extends JobStoreCommonTestBase {
         // given
         jobStore.acquireTriggeredJobs(new Date(5000), Integer.MAX_VALUE);
         JobDetail jd1 = new JobDetail(getUniqueJobKey(), TestJobClass1.class, new SimpleTrigger(new Date(3000)), new JobData(), (short) 1);
-        JobDetail jd2 = new JobDetail(getUniqueJobKey(), TestJobClass1.class, new SimpleTrigger(new Date(4000)), new JobData(), (short) 2);
-        JobDetail jd3 = new JobDetail(getUniqueJobKey(), TestJobClass1.class, new SimpleTrigger(new Date(4000)), new JobData(), (short) 3);
+        JobDetail jd2 = new JobDetail(getUniqueJobKey(), TestJobClass1.class, new SimpleTrigger(new Date(4000)), new JobData(), (short) 3);
+        JobDetail jd3 = new JobDetail(getUniqueJobKey(), TestJobClass1.class, new SimpleTrigger(new Date(4000)), new JobData(), (short) 2);
 
         jobStore.addJob(jd1, false);
         jobStore.addJob(jd2, false);

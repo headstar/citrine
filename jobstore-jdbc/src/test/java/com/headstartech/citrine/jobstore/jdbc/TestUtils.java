@@ -154,6 +154,11 @@ public class TestUtils {
         public void setJobsAsExecuting(Collection<String> jobIds) {
 
         }
+
+        @Override
+        public void delete(List<String> jobIds, int version) {
+
+        }
     }
 
     private static RetryOperations createRetryOperations() {
