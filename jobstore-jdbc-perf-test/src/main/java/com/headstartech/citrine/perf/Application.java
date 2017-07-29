@@ -41,7 +41,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        createJobs();
+        //createJobs();
 
         executeJobs();
     }
@@ -128,6 +128,8 @@ public class Application implements CommandLineRunner {
         DataSource dataSource = null;
         try {
             final Date now = new Date();
+            final int bound = 5000;
+            final int signThreshold = 0;
             dataSource = MySQLDataSourceFactory.createDataSource();
             TransactionOperations transactionOperations = SchedulerHelper.createTransactionOperations(dataSource);
             final Random rng = new Random(System.currentTimeMillis());
@@ -140,8 +142,8 @@ public class Application implements CommandLineRunner {
                         List<JobDetail> jobs = new ArrayList<JobDetail>(batchSize);
                         for (int j = 0; j < batchSize; ++j) {
                             JobKey jobKey = new JobKey(String.valueOf(System.currentTimeMillis()) + "-" + jobIdCounter.incrementAndGet());
-                            int sign = rng.nextInt(100) > 70 ? -1 : 1;
-                            Date scheduleAt = new Date(now.getTime() + sign * 1000000 * (rng.nextInt(200) + 1));
+                            int sign = rng.nextInt(100) >= signThreshold ? -1 : 1;
+                            Date scheduleAt = new Date(now.getTime() + sign * 1000000 * rng.nextInt(bound));
                             JobDetail jd = new JobDetail(jobKey, TestJob.class, new SimpleTrigger(scheduleAt), new JobData(), (short) rng.nextInt(3));
                             jobs.add(jd);
                         }
