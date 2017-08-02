@@ -89,7 +89,7 @@ public class Application implements CommandLineRunner {
                 }
             } finally {
                 executorService.shutdown();
-                executorService.awaitTermination(60, TimeUnit.SECONDS);
+                executorService.awaitTermination(120, TimeUnit.SECONDS);
             }
             end = System.currentTimeMillis();
             logger.info("Rate {} jobs/s, jobs {}", (jobsExecuted.get()/ ((end - start)/ 1000)), jobsExecuted.get());
