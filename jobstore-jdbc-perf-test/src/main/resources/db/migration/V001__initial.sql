@@ -1,9 +1,9 @@
 CREATE TABLE `job` (
   `id` varchar(255) NOT NULL,
-  `created_time` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `updated_time` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `job_state` varchar(45) NOT NULL,
-  `next_execution_time` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `next_execution_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `job_class` varchar(255) NOT NULL,
   `priority` smallint NOT NULL,
   `job_data` varchar(2048) DEFAULT NULL,
